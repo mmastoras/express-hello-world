@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var consume_sqs = require('./routes/consume_sqs');
+var pause = require('./routes/pause');
 
 var app = express();
 
@@ -19,12 +20,13 @@ app.use(favicon());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(cookieParser());
+//app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
 app.use('/consume_sqs', consume_sqs);
+app.use('/pause', pause);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -56,6 +58,16 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
+
+app.set('port', process.env.PORT || 8081);
+
+var debug = require('debug')('express-hello-world');
+var server = app.listen(app.get('port'), function() {
+  debug('Express server listening on port ' + server.address().port);
+});
+
+var cluster = require('cluster');
+console.log('Worker ' + cluster.worker.id + ' running!');
 
 
 module.exports = app;
